@@ -1,6 +1,6 @@
 // lol this source was made in notepad in class unknown if it has a single error. no esp or offsets its just a menu
 // not even hooked to the game lol.
-
+// probably like thousands of errors LOL
 
 namespace Settings
 {
@@ -11,7 +11,6 @@ namespace Settings
     bool FOVCircle = false;
     float Size_Circle = 400.f;
 }
-
 
 std::string string_To_UTF8(const std::string & str)
 {
@@ -131,12 +130,8 @@ Color Col;
 
 bool ShowMenu = true;
 
-ID3D11Device* device = nullptr;
-ID3D11DeviceContext* immediateContext = nullptr;
-ID3D11RenderTargetView* renderTargetView = nullptr;
 
-HRESULT(*present)(IDXGISwapChain* swapChain, UINT syncInterval, UINT flags) = nullptr;
-HRESULT(*resize)(IDXGISwapChain* swapChain, UINT bufferCount, UINT width, UINT height, DXGI_FORMAT newFormat, UINT swapChainFlags) = nullptr;
+
 WNDPROC Menu_Open;
 
 LRESULT CALLBACK FocusFans(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -152,25 +147,16 @@ LRESULT CALLBACK FocusFans(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return CallWindowProc(Menu_Open, hWnd, msg, wParam, lParam);
 }
 
-void Sigs()
+ID3D11Device *device = nullptr;
+ID3D11DeviceContext *immediateContext = nullptr;
+ID3D11RenderTargetView *renderTargetView = nullptr;
+
+HRESULT(*hkresize)(IDXGISwapChain *swapChain, UINT bufferCount, UINT width, UINT height, DXGI_FORMAT newFormat, UINT swapChainFlags) = nullptr;
+
+
+G ReadFNMemory(DWORD_PTR address, const G& def = G())
 {
-
-}
-
-void Offsets()
-{
-
-}
-
-
-void Objects()
-{
-
-}
-
-void ESP()
-{
-	
+	return *(G*)address;
 }
 
 void FortniteFocusFans()
@@ -200,6 +186,120 @@ void FortniteFocusFans()
     ImGui::SliderFloat("Square Size", &Size, 0.f, 200.f);
 }
 
+
+using f_present = HRESULT(__stdcall*)(IDXGISwapChain * pthis, UINT sync_interval, UINT flags);
+f_present o_present = nullptr;
+
+HRESULT __stdcall hk_present(IDXGISwapChain* pSwapChain, UINT sync_interval, UINT flags)
+{
+	if (!device) {
+		pSwapChain->GetDevice(__uuidof(device), reinterpret_cast<PVOID*>(&device));
+		device->GetImmediateContext(&immediateContext);
+
+		ID3D11Texture2D* renderTarget = nullptr;
+		pSwapChain->GetBuffer(0, __uuidof(renderTarget), reinterpret_cast<PVOID*>(&renderTarget));
+		device->CreateRenderTargetView(renderTarget, nullptr, &renderTargetView);
+		renderTarget->Release();
+
+		ImGui_ImplDX11_Init(FindWindow(0, (L"Fortnite  "), device, immediateContext);
+		ImGui_ImplDX11_CreateDeviceObjects();
+	}
+
+	immediateContext->OMSetRenderTargets(1, &renderTargetView, nullptr);
+	auto& window = BeginScene();
+
+	EndScene(window);
+
+	return o_present(pSwapChain, sync_interval, flags);
+}
+
+
+
+void SigsInit()
+{
+  namespace Sigs
+  {
+
+  }
+}
+
+void OffsetsInit()
+{
+  namespace Offsets
+  {
+
+  }
+}
+
+
+void ObjectsInit()
+{
+  namespace Objects
+  {
+
+  }
+}
+
+void ESPInit()
+{
+  namespace ESP
+  {
+        //DWORD Level = 0x90;
+  }
+}
+
+void Init()
+{
+    SigsInit();
+    OffsetsInit();
+    ObjectsInit();
+    ESPInit();
+}
+
+VOID attach() {
+
+	HWND window = FindWindow(0, _xor_(L"Fortnite  ").c_str());
+
+	IDXGISwapChain      *swapChain    = nullptr;
+	ID3D11Device        *device       = nullptr;
+	ID3D11DeviceContext *context      = nullptr;
+	auto                 featureLevel = D3D_FEATURE_LEVEL_11_0;
+
+	DXGI_SWAP_CHAIN_DESC sd           = { 0 };
+	sd.BufferCount                    = 1;
+	sd.BufferDesc.Format              = DXGI_FORMAT_R8G8B8A8_UNORM;
+	sd.BufferUsage                    = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	sd.Flags                          = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	sd.OutputWindow                   = window;
+	sd.SampleDesc.Count               = 1;
+	sd.Windowed                       = TRUE;
+
+	if (FAILED(D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, 0, 0, &featureLevel, 1, D3D11_SDK_VERSION, &sd, &swapChain, &device, nullptr, &context))) {
+		MessageBox(0, _xor_(L"allah says ur black").c_str(), _xor_(L"k").c_str(), MB_ICONERROR);
+		return;
+	}
+
+	auto table = *reinterpret_cast<PVOID **>(swapChain);
+
+	auto present = table[8];
+	auto resize = table[13];
+
+	context->Release();
+	device->Release();
+	swapChain->Release();
+
+	initialize();
+
+	MH_Initialize();
+}
+
+BOOL APIENTRY DllMain(HMODULE module, DWORD reason, LPVOID reserved) {
+	if (reason == DLL_PROCESS_ATTACH) {
+	    init();
+		attach();
+	}
+	return TRUE;
+}
 
 
 
