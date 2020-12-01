@@ -8,7 +8,7 @@ namespace Settings
     float Smooth = 2.f;
     bool Skeleton = false;
     bool Corner_Box_ESP = true;
-    bool FOVCircle = false;
+    bool FOVSquare = false;
     float Size_Circle = 400.f;
 }
 
@@ -116,13 +116,10 @@ public:
 	RGBA purplered_ = { 128,0,128,200 };
 	RGBA greens_ = { 0,255,0,200 };
 	RGBA envy_ = { 0,255,255,200 };
-
 	RGBA glassblack = { 0, 0, 0, 160 };
 	RGBA GlassBlue = { 65,105,225,80 };
 	RGBA glassyellow = { 255,255,0,160 };
 	RGBA glass = { 200,200,200,60 };
-
-
 	RGBA Plum = { 221,160,221,160 };
 
 };
@@ -159,12 +156,16 @@ G ReadFNMemory(DWORD_PTR address, const G& def = G())
 	return *(G*)address;
 }
 
+//menu
+
+// *moans*
+
 void FortniteFocusFans()
 {
 
     int Size = 200;
 
-    if (Settings::FOVCircle == true);
+    if (Settings::FOVSquare == true);
     {
 	int x = GetSystemMetrics(SM_CXSCREEN);
 	int y = GetSystemMetrics(SM_CYSCREEN);
@@ -172,20 +173,22 @@ void FortniteFocusFans()
 	DrawRect(Width / 2, Height / 2, Size, &Col.black, 1);	
     }
 
-    ImGui::Begin("##Fortnite",0, nullptr, ImGuiWindowFlags_::NoResize | ImGuiWindowFlags_::NoCollapse);
+    if (ShowMenu)
+    {
+  	ImGui::Begin("##Fortnite",0, nullptr, ImGuiWindowFlags_::NoResize | ImGuiWindowFlags_::NoCollapse);
 
-    int x = 30;
-    int y = 20;
-    p = ImGui::GetWindowPos();
+  	int x = 30;
+   	int y = 20;
+   	p = ImGui::GetWindowPos();
 
 
-    ImGui::Checkbox("Aimbot", &Settings::Aimbot);
-    ImGui::Checkbox("FOV Square", &Settings::FOVCircle);
-    ImGui::Checkbox("ESP", &Settings::Corner_Box_ESP);
-    ImGui::Checkbox("Player Bones", &Settings::Skeleton);
-    ImGui::SliderFloat("Square Size", &Size, 0.f, 200.f);
+    	ImGui::Checkbox("Aimbot", &Settings::Aimbot);
+    	ImGui::Checkbox("FOV Square", &Settings::FOVSquare);
+   	ImGui::Checkbox("ESP", &Settings::Corner_Box_ESP);
+    	ImGui::Checkbox("Player Bones", &Settings::Skeleton);
+    	ImGui::SliderFloat("Square Size", &Size, 0.f, 200.f);
+   }
 }
-
 
 using f_present = HRESULT(__stdcall*)(IDXGISwapChain * pthis, UINT sync_interval, UINT flags);
 f_present o_present = nullptr;
@@ -223,11 +226,56 @@ void SigsInit()
   }
 }
 
+void OFFSETSHELPER()
+{
+	DWORD Uworld=0x951B9D0;
+	DWORD Levels=0x138;
+	DWORD PersistentLevel=0x30;
+	DWORD LocalPlayers=0x38;
+	DWORD OwningGameInstance=0x180;
+	DWORD ControlRotation=0x288;
+	DWORD PlayerCameraManager=0x2B8;
+	DWORD AcknowledgedPawn=0x2A0;
+	DWORD PlayerState=0x240;
+	DWORD RootComponent=0x130;
+	DWORD Mesh=0x280;
+	DWORD RelativeLocation=0x11C;
+	DWORD ComponentVelocity=0x140;
+	DWORD StaticMesh = 0x478;
+	DWORD TeamIndex = 0xE88;
+	DWORD PrimaryPickupItemEntry=0x2A8;
+	DWORD DisplayName = 0x70;
+	DWORD Tier = 0x54;
+	DWORD ItemDefinition = 0x18;
+	DWORD CurrentWeapon = 0x5C0;
+	DWORD WeaponData = 0x378;
+}
+
 void OffsetsInit()
 {
   namespace Offsets
   {
-
+	Uworld=0x951B9D0;
+	Levels=0x138
+	PersistentLevel=0x30;
+	LocalPlayers=0x38
+	OwningGameInstance=0x180;
+	ControlRotation=0x288;
+	PlayerCameraManager=0x2B8;
+	AcknowledgedPawn=0x2A0;
+	PlayerState=0x240;
+	RootComponent=0x130;
+	Mesh=0x280;
+	RelativeLocation=0x11C;
+	ComponentVelocity=0x140;
+	StaticMesh=0x478;
+	TeamIndex=0xE88;
+	PrimaryPickupItemEntry=0x2A8;
+	DisplayName=0x70;
+	Tier=0x54;
+	ItemDefinition=0x18;
+	CurrentWeapon=0x5C0;
+	WeaponData=0x378;
   }
 }
 
@@ -244,7 +292,7 @@ void ESPInit()
 {
   namespace ESP
   {
-        //DWORD Level = 0x90;
+
   }
 }
 
@@ -254,6 +302,7 @@ void Init()
     OffsetsInit();
     ObjectsInit();
     ESPInit();
+    FortniteFocusFans();
 }
 
 VOID attach() {
@@ -300,7 +349,3 @@ BOOL APIENTRY DllMain(HMODULE module, DWORD reason, LPVOID reserved) {
 	}
 	return TRUE;
 }
-
-
-
-
